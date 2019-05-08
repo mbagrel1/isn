@@ -59,9 +59,17 @@ NUMERO_MAX_NIVEAU = 10
 # +---------------------------------------------------------------------------+
 
 def envoyer_vers_pc(texte):
+    """ Fontion qui permet d'envoyer le texte spécifié au pc.
+    : param texte: texte à envoyer vers le pc
+    : return: rien (None)
+    """
     uart.write(bytes("{}\r\n".format(texte), ENC))
 
 def recevoir_de_pc(delai_attente=0.05):
+    """ Fonction recupérant le texte envoyé par le pc.
+    :param delai_attente: temps de rafraichissement entre deux tours de boucles
+    :return: le texte reçu du pc
+    """
     donnees = uart.readline()
     while not donnees:
         time.sleep(0.05)
@@ -80,12 +88,21 @@ def recevoir_de_pc(delai_attente=0.05):
 # +---------------------------------------------------------------------------+
 
 def alea_led(derniere_pos):
+    """ Fonction qui permet de tirer une led aléatoire en excluant la
+        derniere allumée
+    :param derniere_pos: la derniere position de la led allumée
+    :return: la position de led à allumer
+    """
     liste_alea_tirage = [[1, 2, 3], [0, 2, 3], [0, 1, 3], [0, 1, 2]]
     led_choisie = random.choice(liste_alea_tirage[derniere_pos])
     return led_choisie
 
 
 def alea_sequence(nombre_led_a_allumer):
+    """ Fonction qui permet de generer une sequence aleatoire de led
+    :param nombre_led_a_allumer: le nombre de led pour la sequence
+    :return: la liste des positions de leds à allumer
+    """
     leds_a_allumer = []
     derniere_pos = random.randint(0, 3)
     leds_a_allumer.append(derniere_pos)
@@ -99,20 +116,36 @@ def alea_sequence(nombre_led_a_allumer):
 # +---------------------------------------------------------------------------+
 
 def bouton_appuye(numero_bouton):
+    """ Fonction qui donne l'état du bouton
+    :return: la valeur True si le bouton est appuyé et False s'il n'est
+             pas appuyé
+    """
     return boutons[numero_bouton].value
 
 def etat_boutons():
+    """ Fonction qui permet d'obtenir les etats des boutons du programme
+    :return: la liste des etats des boutons
+    """
     resultat_etat = []
     for numero_bouton in range(4):
         resultat_etat.append(bouton_appuye(numero_bouton))
     return resultat_etat
 
 def clignoter_led(numero_led):
+    """ Fonction qui permet de faire clignoter une led choisie
+    :param numero_led: la position de la led à allumer
+    :return: rien (None)
+    """
     leds[numero_led].value = True
     time.sleep(0.7)
     leds[numero_led].value = False
 
 def doit_on_attendre(derniere_pos=None):
+    """ Fonction qui permet de determiner s'il faut attendre avant de verifier
+        la validité du bouton appuyé en fonction de la lettre
+        :param derniere_pos: la derniere position de led allumee
+        : return: True s'il faut attendre et False sinon
+    """
     tout_eteint = [False, False, False, False]
     if derniere_pos is not None:
         juste_derniere_pos_allumee = [False, False, False, False]
@@ -129,6 +162,12 @@ def doit_on_attendre(derniere_pos=None):
 
 
 def bouton_correct(nouvelle_pos, derniere_pos=None):
+    """ Fonction qui permet de verifier si le bouton appuyé correspond à
+        la led allumee
+        :param nouvelle_pos: la nouvelle position de la led à allumer
+        :return: True si le bouton correspond à la led et False si
+                 ce n'est pas le bon
+    """
     while doit_on_attendre(derniere_pos):
         time.sleep(0.1)
     juste_nouvelle_pos_allumee = [False, False, False, False]
@@ -140,6 +179,10 @@ def bouton_correct(nouvelle_pos, derniere_pos=None):
 # +---------------------------------------------------------------------------+
 
 def niveau(numero_niveau):
+    """ Fonction qui permet de realiser un niveau du jeu
+    :param numero_niveau : le numero du niveau en cours
+    : return: la reussite ou l'échec du niveau et le temps mis pour le realiser
+    """
     signal_depart_de_pc = recevoir_de_pc()
     if signal_depart_de_pc == DEPART:
         print("depart recu")
@@ -158,6 +201,9 @@ def niveau(numero_niveau):
 
 
 def un_joueur():
+    """Fonction qui permet de realiser le jeu solo
+    : return: rien (None)
+    """
     print("un joueur")
     numero_niveau = 1
     niveau_gagne = True
@@ -183,6 +229,9 @@ def un_joueur():
 
 
 def deux_joueur():
+    """ Fonction qui permet de realiser le jeu multijoueur
+    : return: rien (None)
+    """
     numero_niveau_j1 = 1
     numero_niveau_j2 = 1
     joueur1 = True
@@ -248,6 +297,10 @@ def deux_joueur():
             envoyer_vers_pc(FIN)
             envoyer_vers_pc(NUL)
             print("match nul")
+
+# +---------------------------------------------------------------------------+
+# |                            Fonction principale                            |
+# +---------------------------------------------------------------------------+
 
 while True:
     print("J'attends que M. le PC me dise bonjour")
