@@ -39,6 +39,7 @@ IMAGE_GAME_OVER = pygame.image.load("game_over.png")
 IMAGE_CONGRAT = pygame.image.load("congrat.png")
 
 # autres elements de l'interface
+IMAGE_ICONE = pygame.image.load("icone.png")
 IMAGE_CHEVRON_J1 = pygame.image.load("chevron_j1.png")
 IMAGE_CHEVRON_J2 = pygame.image.load("chevron_j2.png")
 IMAGE_JEU = pygame.image.load("jeu.png")
@@ -89,6 +90,8 @@ CORRESPONDANCE_CLAVIER = {
 
 LARGEUR, HAUTEUR = 800, 500
 FENETRE = pygame.display.set_mode((LARGEUR, HAUTEUR))
+NOM_FENETRE = pygame.display.set_caption("Light It Up !")
+pygame.display.set_icon(IMAGE_ICONE)
 FOND_JEU = pygame.Surface(FENETRE.get_size())
 FOND_JEU.fill((209, 196, 176))
 FOND_FIN = pygame.Surface(FENETRE.get_size())
@@ -163,7 +166,7 @@ for niveau in range(1, (NUMERO_MAX_NIVEAU + 1)):
     LISTE_NIVEAU_A_BLITER.append(texte_niveau)
 
 # +---------------------------------------------------------------------------+
-# |     Classe d'exception qui est utilisé pour quitter la fenetre de jeu     |
+# |      Type d'exception qui est utilisé pour quitter la fenetre de jeu      |
 # +---------------------------------------------------------------------------+
 
 class ToutQuitter(Exception):
@@ -183,7 +186,7 @@ def envoyer_vers_carte(texte):
 
 
 def recevoir_de_carte(delai_attente=0.05):
-    """ Fonction recupérant le texte envoyé par la carte.
+    """Fonction recupérant le texte envoyé par la carte.
     :param delai_attente: temps de rafraichissement entre deux tours de boucles
     :return: le texte reçu de la carte
     """
@@ -207,7 +210,7 @@ def recevoir_de_carte(delai_attente=0.05):
 # +---------------------------------------------------------------------------+
 
 def selection_mode_jeu():
-    """ Fonction qui affiche le menu de selection du mode de jeu.
+    """Fonction qui affiche le menu de selection du mode de jeu.
     :return: le mode de jeu selectionne par l'utilisateur
     """
     while True:
@@ -232,7 +235,7 @@ def selection_mode_jeu():
         pygame.display.flip()
 
 def avant_partie_un_joueur():
-    """ Fonction qui permet la saisie du nom du joueur solo
+    """Fonction qui permet la saisie du nom du joueur solo
     :return: le nom du joueur solo
     """
     saisie_en_cours = True
@@ -243,16 +246,22 @@ def avant_partie_un_joueur():
                 raise ToutQuitter("avant_partie_un_joueur")
             elif event.type == KEYDOWN:
                 if event.key in CORRESPONDANCE_CLAVIER and saisie_en_cours:
-                    # (si l'événement se trove dans le dictionnaire et que
-                    #  la saisie est en cours)
+                    # si la touche appuye est dans le dictionnaire
+                    # si la saisie n'est pas fini
                     nom_joueur += CORRESPONDANCE_CLAVIER[event.key]
+                    # on ajoute la lettre correspondante au nom
                     nom_joueur = nom_joueur.title()
+                    # on met la première lettre en majuscule
                 if event.key == K_BACKSPACE and saisie_en_cours:
                     nom_joueur = nom_joueur[: -1]
+                    # on efface le dernier caractère si la chaine
+                    # n'est pas vide
                 if event.key == K_SPACE and saisie_en_cours:
                     nom_joueur = nom_joueur + " "
+                    # on ajoute un espace à la chaine
                 if nom_joueur and event.key == K_RETURN:
                     saisie_en_cours = False
+                    # on termine la saisie en appuyant sur entrée
             elif (event.type == MOUSEBUTTONDOWN and
                   event.button == CLIC_GAUCHE and
                   not saisie_en_cours):
@@ -260,6 +269,7 @@ def avant_partie_un_joueur():
                 x_souris = pos_souris[0]
                 y_souris = pos_souris[1]
                 if 525 < x_souris < 680 and 275 < y_souris < 425:
+                    # le bouton play est considéré comme appuyé
                     return nom_joueur
 
         pygame.draw.rect(FENETRE, BEIGE, (0, 250, 800, 260), 0)
@@ -271,7 +281,7 @@ def avant_partie_un_joueur():
         FENETRE.blit(IMAGE_PLAY, RECT_PLAY)
         pygame.display.flip()
 
-# fonction qui demande les noms des joueurs et lance la partie
+
 def avant_partie_deux_joueur():
     """ Fonction qui permet la saisie des noms des deux joueurs
     :return: les noms des deux joueurs
@@ -286,35 +296,52 @@ def avant_partie_deux_joueur():
             if event.type == QUIT:
                 raise ToutQuitter("avant_partie_deux_joueur")
             elif event.type == KEYDOWN:
-                print("coucou")
                 if event.key in CORRESPONDANCE_CLAVIER and saisie_en_cours_j1:
+                    # si la touche appuyée est dans le dictionnaire
+                    # si la saisie du nom du j1 est en cours
                     nom_joueur_1 += CORRESPONDANCE_CLAVIER[event.key]
+                    # on ajoute la lettre au nom du j1
                     nom_joueur_1 = nom_joueur_1.title()
+                    # on met la première lettre de chaque mot j1 en majuscule
                 if event.key == K_BACKSPACE and saisie_en_cours_j1:
                     nom_joueur_1 = nom_joueur_1[: -1]
+                    # on efface la dernière lettre
+                    #si la chaine du j1 n'est pas vide
                 if event.key == K_SPACE and saisie_en_cours_j1:
                     nom_joueur_1 = nom_joueur_1 + " "
+                    # on ajoute un espace à la chaine du j1
                 if (nom_joueur_1 and saisie_en_cours_j1 and
                         not saisie_en_cours_j2 and event.key == K_RETURN):
+                    # on termine la saisie du j1 en appuyant sur entrée
                     saisie_en_cours_j1 = False
                     saisie_en_cours_j2 = True
                 if event.key in CORRESPONDANCE_CLAVIER and saisie_en_cours_j2:
+                    # si la touche appuyée est dans le dictionnaire
+                    # si la saisie du nom du j2 est en cours
                     nom_joueur_2 += CORRESPONDANCE_CLAVIER[event.key]
+                    # on ajoute la lettre au nom du j2
                     nom_joueur_2 = nom_joueur_2.title()
+                    # on met la première lettre de chaque mot j2 en majuscule
                 if event.key == K_BACKSPACE and saisie_en_cours_j2:
                     nom_joueur_2 = nom_joueur_2[: -1]
+                    # on efface la dernière lettre
+                    #si la chaine du j2 n'est pas vide
                 if event.key == K_SPACE and saisie_en_cours_j2:
                     nom_joueur_2 = nom_joueur_2 + " "
+                    # on ajoute un espace à la chaine du j2
                 if (nom_joueur_2 and not saisie_en_cours_j1 and
                         saisie_en_cours_j2 and event.key == K_RETURN):
+                    # on termine la saisie du j2 en appuyant sur entrée
                     saisie_en_cours_j2 = False
             elif (event.type == MOUSEBUTTONDOWN and
                   event.button == CLIC_GAUCHE and not saisie_en_cours_j1 and
                   not saisie_en_cours_j2):
+                    # si la saisie n'est plus en cours et si on clique gauche
                 pos_souris = pygame.mouse.get_pos()
                 x_souris = pos_souris[0]
                 y_souris = pos_souris[1]
                 if 525 < x_souris < 680 and 275 < y_souris < 425:
+                    # le bouton play est considéré comme appuyé
                     return nom_joueur_1, nom_joueur_2
 
         pygame.draw.rect(FENETRE, BEIGE, (0, 250, 800, 260), 0)
@@ -330,12 +357,11 @@ def avant_partie_deux_joueur():
         FENETRE.blit(IMAGE_PLAY, RECT_PLAY)
         pygame.display.flip()
 
-# fonction qui execute le jeu pour un joueur
 def partie_un_joueur(nom_joueur):
-    """ Fonction qui affiche les messages de la carte durant le jeu solo
+    """Fonction qui affiche dans l'interface l'avancement dans le jeu solo
     :param nom_joueur: le nom du joueur solo
-    :return : le résultat perdu ou gagné de la partie et le niveau
-              correspondant à la fin de la partie
+    :return: le résultat perdu ou gagné de la partie et le niveau
+             correspondant à la fin de la partie
     """
     jeu_en_cours = False
     jeu_fini = False
@@ -348,19 +374,23 @@ def partie_un_joueur(nom_joueur):
             elif (event.type == MOUSEBUTTONDOWN and
                   event.button == CLIC_GAUCHE and not jeu_en_cours and
                   not jeu_fini):
+                    # si le jeu est en cours et pas fini et qu'on clique gauche
                 pos_souris = pygame.mouse.get_pos()
                 x_souris = pos_souris[0]
                 y_souris = pos_souris[1]
                 if 300 < x_souris < 500 and 430 < y_souris < 480:
+                    # le bouton play est consdéré comme appuyé
                     envoyer_vers_carte(DEPART)
                     print("DEPART")
                     jeu_en_cours = True
             elif (event.type == MOUSEBUTTONDOWN and
                   event.button == CLIC_GAUCHE and jeu_fini):
+                    # si on clique gauche et que je jeu est fini
                 pos_souris = pygame.mouse.get_pos()
                 x_souris = pos_souris[0]
                 y_souris = pos_souris[1]
                 if 750 < x_souris < 800 and 450 < y_souris < 500:
+                    # le bouton fleche est considéré comme cliqué
                     niveau = len(liste_messages_a_bliter)
                     return resultat, niveau
 
@@ -371,12 +401,15 @@ def partie_un_joueur(nom_joueur):
         FENETRE.blit(texte_nom_joueur, (340, 25))
         FENETRE.blit(IMAGE_BOUTON_DEPART, RECT_BOUTON_DEPART)
 
+# boucle qui permet d'afficher les messages correct ou perdu dans l'interface
         for i, message_niveau in enumerate(liste_messages_a_bliter):
             FENETRE.blit(message_niveau, (375, 85 + i * 30))
 
+# boucle qui permet d'afficher le temps pour chaque niveau
         for i, message_temps in enumerate(liste_temps_a_bliter):
             FENETRE.blit(message_temps, (500, 85 + i * 30))
 
+# boucle qui permet d'afficher les niveaux dans l'interface
         for i, texte_niveau in enumerate(LISTE_NIVEAU_A_BLITER):
             FENETRE.blit(texte_niveau, (235, 85 + i * 30))
 
@@ -393,13 +426,17 @@ def partie_un_joueur(nom_joueur):
             signal_de_carte = recevoir_de_carte()
             if signal_de_carte == GAGNE:
                 liste_messages_a_bliter.append(VALIDE)
-                print("niveau")
+                # le niveau est considéré comme gagné
+                print("niveau gagné")
             elif signal_de_carte == PERDU:
                 liste_messages_a_bliter.append(RATE)
+                #le niveau est considéré comme perdu
+                print("niveau perdu")
                 jeu_fini = True
                 resultat = PERDU
             elif signal_de_carte == GOD:
                 liste_messages_a_bliter.append(VALIDE)
+                # le jeu est considéré comme gagné
                 print("god recu")
                 jeu_fini = True
                 resultat = GOD
@@ -408,13 +445,14 @@ def partie_un_joueur(nom_joueur):
             jeu_en_cours = False
         if jeu_fini:
             FENETRE.blit(IMAGE_FLECHE, RECT_FLECHE)
+            # on affiche la flèche qui permet d'accéder à l'interface de fin
 
         pygame.display.flip()
 
 def essai_joueur():
-    """ Fonction pour le mode deux joueurs qui permet de generer les
-        messages à afficher de l'interface de jeu en fonction des donnees
-        de la carte
+    """Fonction pour le mode deux joueurs qui permet de generer les
+        messages à afficher dans l'interface de jeu en fonction des donnees
+        de la carte pour un niveau
         :return: le message qui valide ou invalide le niveau et le
                  temps associé au niveau essayé
         """
@@ -429,20 +467,24 @@ def essai_joueur():
     signal_de_carte = recevoir_de_carte()
     if signal_de_carte == GAGNE:
         nouveau_message_a_bliter = VALIDE
+        # le niveau est considéré comme gagné
+        print("niveau gagné")
     elif signal_de_carte == PERDU:
         nouveau_message_a_bliter = RATE
+        # le niveau est considéré comme perdu
+        print("niveau perdu")
     else:
         raise Exception("resultat inconnu")
 
     return (nouveau_message_a_bliter, nouveau_temps_a_bliter)
 
 def partie_deux_joueurs(nom_joueur_1, nom_joueur_2):
-    """ Fonction qui affiche les messages de la carte durant le jeu
+    """ Fonction qui affiche dans l'interface l'avancement dans le jeu
         deux joueurs
     :param nom_joueur1: le nom du joueur 1
     :param nom_joueur2: le nom du joueur 2
     :return : le resultat de la fin de la partie (match nul, joueur 1
-              vainqueur, joueur 2 vainqueur ou dieu)
+              vainqueur, joueur 2 vainqueur ou dieux)
     """
     jeu_fini = False
     jeu_en_cours = False
@@ -460,19 +502,23 @@ def partie_deux_joueurs(nom_joueur_1, nom_joueur_2):
             elif (event.type == MOUSEBUTTONDOWN and
                   event.button == CLIC_GAUCHE and
                   not jeu_en_cours and not jeu_fini):
+                # si le jeu est en cours et n'est pas fini et qu'on clique gauche
                 pos_souris = pygame.mouse.get_pos()
                 x_souris = pos_souris[0]
                 y_souris = pos_souris[1]
                 if 300 < x_souris < 500 and 430 < y_souris < 480:
+                    # le bouton play est considéré comme appuyé
                     envoyer_vers_carte(DEPART)
                     print("DEPART")
                     jeu_en_cours = True
             elif (event.type == MOUSEBUTTONDOWN and
                   event.button == CLIC_GAUCHE and jeu_fini):
+                # si le jeu est fini et qu'on clique gauche
                 pos_souris = pygame.mouse.get_pos()
                 x_souris = pos_souris[0]
                 y_souris = pos_souris[1]
                 if 750 < x_souris < 800 and 450 < y_souris < 500:
+                    # le bouton flèche est considéré comme cliqué
                     return resultat
 
         pygame.draw.rect(FENETRE, NOIR, (0, 800, 0, 500), 0)
@@ -487,21 +533,35 @@ def partie_deux_joueurs(nom_joueur_1, nom_joueur_2):
         FENETRE.blit(texte_nom_joueur_2, (550, 40))
         FENETRE.blit(IMAGE_BOUTON_DEPART, RECT_BOUTON_DEPART)
 
+
+#pour le joueur 1
+# boucle qui permet d'afficher les messages correct ou perdu dans l'interface
         for i, message_niveau_j1 in enumerate(liste_messages_j1_a_bliter):
             FENETRE.blit(message_niveau_j1, (180, 140 + i * 25))
 
+
+# boucle qui permet d'afficher le temps pour chaque niveau
         for i, message_temps_j1 in enumerate(liste_temps_j1_a_bliter):
             FENETRE.blit(message_temps_j1, (280, 140 + i * 25))
 
+
+# boucle qui permet d'afficher les niveaux dans l'interface
         for i, texte_niveau_j1 in enumerate(LISTE_NIVEAU_A_BLITER):
             FENETRE.blit(texte_niveau_j1, (80, 140 + i * 25))
+
+# pour le joueur 2
+# boucle qui permet d'afficher les messages correct ou perdu dans l'interface
 
         for i, message_niveau_j2 in enumerate(liste_messages_j2_a_bliter):
             FENETRE.blit(message_niveau_j2, (580, 140 + i * 25))
 
+
+# boucle qui permet d'afficher le temps pour chaque niveau
         for i, message_temps_j2 in enumerate(liste_temps_j2_a_bliter):
             FENETRE.blit(message_temps_j2, (680, 140 + i * 25))
 
+
+# boucle qui permet d'afficher les niveaux dans l'interface
         for i, texte_niveau_j2 in enumerate(LISTE_NIVEAU_A_BLITER):
             FENETRE.blit(texte_niveau_j2, (480, 140 + i * 25))
 
@@ -545,15 +605,16 @@ def partie_deux_joueurs(nom_joueur_1, nom_joueur_2):
 
         if jeu_fini:
             FENETRE.blit(IMAGE_FLECHE, RECT_FLECHE)
+            # on affiche la fleche qui permet de mettre l'écran de jeu
 
         pygame.display.flip()
 
-# fonction qui affiche la FENETRE de fin
 def fin_de_partie_un_joueur(resultat_partie, niveau):
-    """Fonction qui permet l'affichage des messages de fin de partie
-       sur l'interface de jeu.
+    """Fonction qui permet l'affichage des messages de fin de partie un joueur
+       dans l'interface de jeu
     :param resultat_partie: le resultat god ou perdu de la carte
     : param niveau: le niveau ou la fin de partie a été déclenchée
+    :return: rien (None)
     """
     while True:
         for event in pygame.event.get():
@@ -561,11 +622,13 @@ def fin_de_partie_un_joueur(resultat_partie, niveau):
                 print("sortie")
                 raise ToutQuitter("fin_de_partie_un_joueur")
             elif event.type == MOUSEBUTTONDOWN and event.button == CLIC_GAUCHE:
+                # si on clique gauche
                 pos_souris = pygame.mouse.get_pos()
                 x_souris = pos_souris[0]
                 y_souris = pos_souris[1]
                 if 290 < x_souris < 590 and 427 < y_souris < 517:
-                    print("recommence detecte")
+                    # le bouton recommencer est considéré comme cliqué
+                    print("recommencer")
                     main()
         niveau_affiche = POLICE_MESSAGE_VICTOIRE.render(
             "Level : {}".format(niveau), True, ORANGE)
@@ -599,10 +662,13 @@ def fin_de_partie_deux_joueur(resultat_partie, nom_joueur_1, nom_joueur_2):
             if event.type == QUIT:
                 raise ToutQuitter("fin_de_partie_deux_joueur")
             elif event.type == MOUSEBUTTONDOWN and event.button == CLIC_GAUCHE:
+                # si on clique gauche
                 pos_souris = pygame.mouse.get_pos()
                 x_souris = pos_souris[0]
                 y_souris = pos_souris[1]
                 if 290 < x_souris < 590 and 427 < y_souris < 517:
+                    # le bouton recommencer est considéré comme cliqué
+                    print("recommencer")
                     main()
 
         FENETRE.blit(FOND_FIN, (0, 0))
@@ -629,7 +695,7 @@ def fin_de_partie_deux_joueur(resultat_partie, nom_joueur_1, nom_joueur_2):
         pygame.display.flip()
 
 def handshake():
-    """Fonction qui permet de vérifier le fonctrionnement de la
+    """Fonction qui permet de vérifier le fonctionnement de la
        communication dans les deux sens avant de commencer le jeu
     :return: rien (None)
     """
@@ -637,8 +703,12 @@ def handshake():
     envoyer_vers_carte("Bonjour Mme la carte !")
     print("j'ai dis bonjour à Mme la carte.\n"
           "J'attends qu'elle me dise bonjour en retour")
-    print("Mme la carte m'a dit bonjour : \"{}\"".format(recevoir_de_carte()))
-    print("On peut commencer\n")
+    signal_de_carte = recevoir_de_carte()
+    if signal_de_carte == "Bonjour M. le PC !":
+        print("Mme la carte m'a dit bonjour : \"{}\"".format(signal_de_carte))
+        print("On peut commencer\n")
+    else:
+        raise Exception("Message pas courtois")
 
 # +---------------------------------------------------------------------------+
 # |                            Fonction principale                            |

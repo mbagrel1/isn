@@ -9,28 +9,27 @@ import busio
 from digitalio import DigitalInOut, Direction
 
 
+# +---------------------------------------------------------------------------+
+# |                     Connexion des leds et des boutons                     |
+# +---------------------------------------------------------------------------+
+
 uart = busio.UART(board.TX, board.RX, baudrate=9600)
 
+LED_CONNEXIONS = [board.D8, board.D9, board.D10, board.D11]
+LEDS = []
 
-# +---------------------------------------------------------------------------+
-# |                           Import des librairies                           |
-# +---------------------------------------------------------------------------+
-
-led_connections = [board.D8, board.D9, board.D10, board.D11]
-leds = []
-boutons = []
-
-for pin in led_connections:
+for pin in LED_CONNEXIONS:
     led = DigitalInOut(pin)
     led.direction = Direction.OUTPUT
-    leds.append(led)
+    LEDS.append(led)
 
-bouton_connections = [board.D2, board.D3, board.D4, board.D5]
+BOUTON_CONNEXIONS = [board.D2, board.D3, board.D4, board.D5]
+BOUTONS = []
 
-for pin in bouton_connections:
+for pin in BOUTON_CONNEXIONS:
     bouton = DigitalInOut(pin)
     bouton.direction = Direction.INPUT
-    boutons.append(bouton)
+    BOUTONS.append(bouton)
 
 # +---------------------------------------------------------------------------+
 # |                            Variables globales                             |
@@ -51,7 +50,7 @@ J2G = "2g"
 NUL = "n"
 GOD = "d"
 CONTINUER = "c"
-LISTE_NIVEAUX = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10}
+LEDS_PAR_NIVEAU = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10}
 NUMERO_MAX_NIVEAU = 10
 
 # +---------------------------------------------------------------------------+
@@ -91,7 +90,7 @@ def alea_led(derniere_pos):
     """ Fonction qui permet de tirer une led aléatoire en excluant la
         derniere allumée
     :param derniere_pos: la derniere position de la led allumée
-    :return: la position de led à allumer
+    :return: la position de la nouvelle led à allumer
     """
     liste_alea_tirage = [[1, 2, 3], [0, 2, 3], [0, 1, 3], [0, 1, 2]]
     led_choisie = random.choice(liste_alea_tirage[derniere_pos])
@@ -101,7 +100,7 @@ def alea_led(derniere_pos):
 def alea_sequence(nombre_led_a_allumer):
     """ Fonction qui permet de generer une sequence aleatoire de led
     :param nombre_led_a_allumer: le nombre de led pour la sequence
-    :return: la liste des positions de leds à allumer
+    :return: la liste des positions de LEDS à allumer
     """
     leds_a_allumer = []
     derniere_pos = random.randint(0, 3)
@@ -120,11 +119,11 @@ def bouton_appuye(numero_bouton):
     :return: la valeur True si le bouton est appuyé et False s'il n'est
              pas appuyé
     """
-    return boutons[numero_bouton].value
+    return BOUTONS[numero_bouton].value
 
 def etat_boutons():
-    """ Fonction qui permet d'obtenir les etats des boutons du programme
-    :return: la liste des etats des boutons
+    """ Fonction qui permet d'obtenir les etats des BOUTONS du programme
+    :return: la liste des etats des BOUTONS
     """
     resultat_etat = []
     for numero_bouton in range(4):
@@ -136,13 +135,13 @@ def clignoter_led(numero_led):
     :param numero_led: la position de la led à allumer
     :return: rien (None)
     """
-    leds[numero_led].value = True
+    LEDS[numero_led].value = True
     time.sleep(0.7)
-    leds[numero_led].value = False
+    LEDS[numero_led].value = False
 
 def doit_on_attendre(derniere_pos=None):
     """ Fonction qui permet de determiner s'il faut attendre avant de verifier
-        la validité du bouton appuyé en fonction de la lettre
+        la validité du bouton appuyé en fonction de la led allumée
         :param derniere_pos: la derniere position de led allumee
         : return: True s'il faut attendre et False sinon
     """
@@ -153,9 +152,11 @@ def doit_on_attendre(derniere_pos=None):
 
     resultat_etat = etat_boutons()
     if resultat_etat == tout_eteint:
+        # pas de pression sur aucun bouton
         return True
     elif (derniere_pos is not None and resultat_etat ==
           juste_derniere_pos_allumee):
+    # si on est encore en train d'appuyer sur la position d'avant
         return True
     else:
         return False
@@ -164,7 +165,7 @@ def doit_on_attendre(derniere_pos=None):
 def bouton_correct(nouvelle_pos, derniere_pos=None):
     """ Fonction qui permet de verifier si le bouton appuyé correspond à
         la led allumee
-        :param nouvelle_pos: la nouvelle position de la led à allumer
+        :param nouvelle_pos: la position de la led allumée
         :return: True si le bouton correspond à la led et False si
                  ce n'est pas le bon
     """
@@ -173,6 +174,7 @@ def bouton_correct(nouvelle_pos, derniere_pos=None):
     juste_nouvelle_pos_allumee = [False, False, False, False]
     juste_nouvelle_pos_allumee[nouvelle_pos] = True
     return (etat_boutons() == juste_nouvelle_pos_allumee)
+    # True si ca correspond et False si ce n'est pas égal
 
 # +---------------------------------------------------------------------------+
 # |                   Définition des fonctions pour le jeu                    |
@@ -181,13 +183,14 @@ def bouton_correct(nouvelle_pos, derniere_pos=None):
 def niveau(numero_niveau):
     """ Fonction qui permet de realiser un niveau du jeu
     :param numero_niveau : le numero du niveau en cours
-    : return: la reussite ou l'échec du niveau et le temps mis pour le realiser
+    : return: True en cas de réussite de niveau sinon False et le
+              temps mis pour le realiser
     """
     signal_depart_de_pc = recevoir_de_pc()
     if signal_depart_de_pc == DEPART:
         print("depart recu")
         time.sleep(1)
-        n = LISTE_NIVEAUX[numero_niveau]
+        n = LEDS_PAR_NIVEAU[numero_niveau]
         sequence = alea_sequence(n)
         for pos in sequence:
             clignoter_led(pos)
@@ -209,6 +212,7 @@ def un_joueur():
     niveau_gagne = True
     time.sleep(1)
     while numero_niveau <= NUMERO_MAX_NIVEAU and niveau_gagne:
+        # tant que le niveau est plus petit que le niveau max
         niveau_gagne, temps = niveau(numero_niveau)
         if niveau_gagne:
             print(temps)
@@ -270,7 +274,7 @@ def deux_joueur():
 
         if joueur1 and joueur2:
             if (numero_niveau_j1 > NUMERO_MAX_NIVEAU and
-                 numero_niveau_j2 > NUMERO_MAX_NIVEAU):
+                numero_niveau_j2 > NUMERO_MAX_NIVEAU):
                 if tempsj1 > tempsj2:
                     print("le joueur 2 gagne")
                     envoyer_vers_pc(FIN)
@@ -298,17 +302,28 @@ def deux_joueur():
             envoyer_vers_pc(NUL)
             print("match nul")
 
+
+def handshake():
+    """Fonction qui permet de vérifier le fonctionnement de la
+       communication dans les deux sens avant de commencer le jeu
+    :return: rien (None)
+    """
+    print("J'attends que M. le PC me dise bonjour")
+    signal_pc = recevoir_de_pc()
+    if signal_pc == "Bonjour Mme la carte !":
+        print("M. le PC m'a dit bonjour : \"{}\"".format(recevoir_de_pc()))
+        print("Maintenant, je dis bonjour à M. le PC")
+        envoyer_vers_pc("Bonjour M. le PC !")
+        print("J'ai dis bonjour à M. le PC.\nOn peut commencer\n")
+    else:
+        raise Exception("Message pas courtois")
+
 # +---------------------------------------------------------------------------+
 # |                            Fonction principale                            |
 # +---------------------------------------------------------------------------+
 
 while True:
-    print("J'attends que M. le PC me dise bonjour")
-    print("M. le PC m'a dit bonjour : \"{}\"".format(recevoir_de_pc()))
-    print("Maintenant, je dis bonjour à M. le PC")
-    envoyer_vers_pc("Bonjour M. le PC !")
-    print("J'ai dis bonjour à M. le PC.\nOn peut commencer\n")
-
+    handshake()
     signal_pc = recevoir_de_pc()
     if signal_pc == SINGLEPLAYER:
         mode_jeu = 1
